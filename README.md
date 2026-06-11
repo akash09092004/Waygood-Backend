@@ -1,102 +1,163 @@
-# Waygood Backend — Run & Submission Guide
+# Waygood Backend — Assignment Submission Guide
 
-Ye README aapke backend assignment ko local pe chalane, seed data daalne, aur important API endpoints test karne ke liye step-by-step instructions deta hai.
+Ye file backend assignment ko review karne walon ke liye clear instructions aur examples provide karti hai.
 
-## Prerequisites
-- Node.js (v16+)
-- npm
-- MongoDB (local `mongod` running) or a MongoDB Atlas URI
+## 1. Project setup
 
-## Setup
-1. Workspace me `backend` folder open karo.
-2. Dependencies install karo:
+1. `backend` folder open karo.
+2. Dependency install karo:
 
-```bash
-cd backend
-npm install
-```
+   ```bash
+   cd backend
+   npm install
+   ```
 
-3. Environment variables: backend folder me `.env` file banao with:
+3. `.env` file create karo `backend` folder me:
 
-```
-PORT=4000
-MONGO_URI=mongodb://127.0.0.1:27017/waygood-evaluation
-JWT_SECRET=dev-secret
-JWT_EXPIRES_IN=1d
-```
+   ```env
+   PORT=4000
+   MONGO_URI=mongodb://127.0.0.1:27017/waygood-evaluation
+   JWT_SECRET=dev-secret
+   JWT_EXPIRES_IN=1d
+   ```
 
-Replace `MONGO_URI` with your Atlas string if you use cloud DB.
+4. Agar aap cloud MongoDB use kar rahe ho to `MONGO_URI` ko apni Atlas connection string se replace karo.
 
-## Seed the database (sample data)
-Seed script inserts sample universities, programs, students, and applications.
+## 2. Seed data chalana
+
+Sample data insert karne ke liye:
 
 ```bash
 cd backend
 npm run seed
 ```
 
-If seed prints `MONGO_URI: undefined`, set `.env` correctly and ensure MongoDB is running.
+Ye script insert karega:
+- Universities
+- Programs
+- Students
+- Applications
 
-## Start the server
+Agar error aaye aur `MONGO_URI: undefined` dikhaye, toh `.env` check karo aur MongoDB service start karo.
 
-Development (auto-restart):
+## 3. Server start karna
+
+Development mode:
+
 ```bash
 npm run dev
 ```
 
-Production:
+Production mode:
+
 ```bash
 npm start
 ```
 
-Default server port: `4000` (change with `PORT` env).
+Default port: `4000`.
 
-## Auth (required for protected endpoints)
-- Login: `POST /api/auth/login` — use credentials from seed or your own user.
-- Use returned token in requests:
+## 4. Authentication
+
+Protected endpoints ko access karne ke liye pehle login karo.
+
+### Login endpoint
+
+- URL: `POST /api/auth/login`
+- Body:
+
+  ```json
+  {
+    "email": "aarav@example.com",
+    "password": "Candidate123!"
+  }
+  ```
+
+### Seeded users
+
+Agar aap seed data use kar rahe ho, valid credentials:
+
+- `aarav@example.com` / `Candidate123!`
+- `sara@example.com` / `Candidate123!`
+- `counselor@example.com` / `Candidate123!`
+
+### Auth header example
 
 ```
 Authorization: Bearer <TOKEN>
 ```
 
-## Important endpoints (examples)
+## 5. Important API endpoints
 
-- List applications
-  - `GET /api/applications/`
+### 5.1 List applications
 
-- Get application by id
-  - `GET /api/applications/:id`
-  - Example:
+- `GET /api/applications/`
+- Protected: token required
+
+Example:
 
 ```bash
 curl -H "Authorization: Bearer <TOKEN>" \
-  http://localhost:4000/api/applications/6a29577b77b06d352ac208d
+  http://localhost:4000/api/applications/
 ```
 
-- Update application status
-  - `PATCH /api/applications/:id/status`
-  - Body example:
+### 5.2 Get application by id
 
-```json
-{
-  "status": "under_review",
-  "note": "Testing status update"
-}
+- `GET /api/applications/:id`
+
+Example:
+
+```bash
+curl -H "Authorization: Bearer <TOKEN>" \
+  http://localhost:4000/api/applications/<APPLICATION_ID>
 ```
 
-Note: repository accepts both `under-review` and `under_review` as status values.
+### 5.3 Update application status
 
-## Common issues & fixes
-- 401 Unauthorized: check `Authorization` header and token expiry. Re-login to get new token.
-- Cast to ObjectId failed: use a valid 24-character MongoDB `_id` (use list endpoint to find one).
-- Seed failed / MONGO_URI undefined: add `MONGO_URI` to `.env` and ensure MongoDB is running.
+- `PATCH /api/applications/:id/status`
+- Body example:
 
-## Submission checklist (for assignment)
-- Include this README in the `backend` folder.
-- Ensure the server runs with `npm run dev` and seed completes.
-- Provide a sample valid Application `_id` and a sample token when submitting, so reviewer can verify quickly.
-- Note any code changes made (if any). I did not modify application logic unless requested.
+  ```json
+  {
+    "status": "under_review",
+    "note": "Status updated for review"
+  }
+  ```
+
+Note: backend ab `under-review` aur `under_review` dono status formats support karta hai.
+
+## 6. How to get a valid Application ID
+
+1. Seed data run karo.
+2. `GET /api/applications/` hit karo.
+3. Response ka `data` array dekho aur kisi application ka `_id` copy karo.
+
+Example ID format:
+
+```text
+62f1a4c5d4ba3a001234abcd
+```
+
+## 7. Common issues
+
+- **401 Unauthorized**
+  - `Authorization` header sahi se set karo.
+  - Token expired ho sakta hai, dubara login karo.
+
+- **Cast to ObjectId failed**
+  - ID valid 24-character MongoDB ObjectId nahi hai.
+  - `GET /api/applications/` se valid ID le kar use karo.
+
+- **Seed failed / MONGO_URI undefined**
+  - `.env` file me `MONGO_URI` add karo.
+  - Local MongoDB start karo.
+
+## 8. Submission notes
+
+- `backend/README.md` me full setup and run instructions diye gaye hain.
+- Backend server ko `npm run dev` se chalaya ja sakta hai.
+- Seed data se sample users aur applications add ho jate hain.
+- Main code me koi logic change nahi kiya bina aapki permission ke.
 
 ---
 
-If chaho, main ab seed + server run karke sample IDs aur curl examples provide kar dunga — permission do to run them on your machine.
+Agar aap chaho, main abhi `backend` me seed + server run karke ek valid `Application ID` aur `curl` commands provide kar sakta hoon.
