@@ -1,4 +1,4 @@
-# Waygood Backend — Assignment Submission Guide
+# Waygood Backend 
 
 Ye file backend assignment ko review karne walon ke liye clear instructions aur examples provide karti hai.
 
@@ -16,7 +16,7 @@ Ye file backend assignment ko review karne walon ke liye clear instructions aur 
 
    ```env
    PORT=4000
-   MONGO_URI=mongodb://127.0.0.1:27017/waygood-evaluation
+   MONGO_URI=mongodb+srv://Akash66:akash123@cluster0.kzf3i1s.mongodb.net/backend?appName=Cluster0
    JWT_SECRET=dev-secret
    JWT_EXPIRES_IN=1d
    ```
@@ -86,44 +86,103 @@ Agar aap seed data use kar rahe ho, valid credentials:
 Authorization: Bearer <TOKEN>
 ```
 
-## 5. Important API endpoints
+## 5. All API Endpoints
 
-### 5.1 List applications
+Base URL: `http://localhost:4000/api`
 
-- `GET /api/applications/`
-- Protected: token required
+### 5.1 Authentication (`/auth`)
 
-Example:
+- `POST /auth/register` — naya student account banao
+  - Body:
+    ```json
+    {
+      "fullName": "Aarav Sharma",
+      "email": "aarav@example.com",
+      "password": "Candidate123!",
+      "role": "student"
+    }
+    ```
 
-```bash
-curl -H "Authorization: Bearer <TOKEN>" \
-  http://localhost:4000/api/applications/
-```
+- `POST /auth/login` — login karke token pao
+  - Body:
+    ```json
+    {
+      "email": "aarav@example.com",
+      "password": "Candidate123!"
+    }
+    ```
+  - Response:
+    ```json
+    {
+      "success": true,
+      "token": "eyJhbGciOiJIUzI1NiIs..."
+    }
+    ```
 
-### 5.2 Get application by id
+- `GET /auth/me` — logged-in user ki details (protected)
+  - Header: `Authorization: Bearer <TOKEN>`
 
-- `GET /api/applications/:id`
+### 5.2 Applications (`/applications`)
 
-Example:
+- `GET /applications/` — sabhi applications dekho
+  - Query params: `studentId`, `status`
+  - Protected: token required
 
-```bash
-curl -H "Authorization: Bearer <TOKEN>" \
-  http://localhost:4000/api/applications/<APPLICATION_ID>
-```
+- `GET /applications/:id` — ek application ki details dekho
+  - Path: `:id` = MongoDB `_id`
+  - Protected: token required
+  - Example:
+    ```bash
+    curl -H "Authorization: Bearer <TOKEN>" \
+      http://localhost:4000/api/applications/<APPLICATION_ID>
+    ```
 
-### 5.3 Update application status
+- `POST /applications/` — naya application create karo
+  - Body:
+    ```json
+    {
+      "student": "<STUDENT_ID>",
+      "program": "<PROGRAM_ID>",
+      "intake": "September"
+    }
+    ```
 
-- `PATCH /api/applications/:id/status`
-- Body example:
+- `PATCH /applications/:id/status` — application ka status update karo
+  - Body:
+    ```json
+    {
+      "status": "under_review",
+      "note": "Status updated for review"
+    }
+    ```
+  - Valid statuses: `draft`, `submitted`, `under-review`, `under_review`, `offer-received`, `visa-processing`, `enrolled`, `rejected`
 
-  ```json
-  {
-    "status": "under_review",
-    "note": "Status updated for review"
-  }
-  ```
+### 5.3 Programs (`/programs`)
 
-Note: backend ab `under-review` aur `under_review` dono status formats support karta hai.
+- `GET /programs/` — sabhi programs dekho
+  - Query params supported: filters
+
+### 5.4 Universities (`/universities`)
+
+- `GET /universities/` — sabhi universities dekho
+  - Query params supported: filters
+
+- `GET /universities/popular` — popular universities dekho (sorted by score)
+
+### 5.5 Recommendations (`/recommendations`)
+
+- `GET /recommendations/:studentId` — student ke liye program recommendations dekho
+  - Path: `:studentId` = MongoDB Student `_id`
+
+### 5.6 Dashboard (`/dashboard`)
+
+- `GET /dashboard/overview` — dashboard statistics dekho
+  - Stats: total students, programs, applications, status breakdown, top countries
+
+### 5.7 Health Check (`/health`)
+
+- `GET /health/` — server status check karo
+  - Public endpoint (no auth needed)
 
 ## 6. How to get a valid Application ID
 
@@ -149,7 +208,7 @@ Example ID format:
 
 - **Seed failed / MONGO_URI undefined**
   - `.env` file me `MONGO_URI` add karo.
-  - Local MongoDB start karo.
+  
 
 ## 8. Submission notes
 
